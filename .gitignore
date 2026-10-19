@@ -1,0 +1,6 @@
+﻿.env
+.env.*
+storage/logs/*.log
+backups/*
+uploads/announcements/*
+!backups/.gitkeep
