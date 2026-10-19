@@ -4,12 +4,37 @@ Announcement, event and calendar management system for DEBESMSCAT. Built with pl
 
 ## Features
 
-- Role-based access: `super_admin`, `admin`, `instructor`, `student`
+- Role-based access: `super_admin`, `admin`, `instructor`, `student` (see Roles and accounts below)
 - Announcements with audience targeting (college, program, year level, section)
 - Event announcements with Google Calendar invite links and `.ics` attachments
 - Automatic email notifications to targeted users when an announcement is published
 - Email queue with daily rate limiting (`MAIL_DAILY_LIMIT`)
 - Calendar, rooms, accounts management, analytics and activity logging
+
+## Roles and accounts
+
+The database defines the following values for `users.role`:
+
+| Role | Implemented in code | Notes |
+|---|---|---|
+| `student` | Yes | Default role for self-registration; new accounts are saved as `student` with status `pending` until approved |
+| `instructor` | Yes | Has dashboards, RBAC permissions and can create announcements and rooms |
+| `admin` | Yes | College-level user, room and announcement management |
+| `super_admin` | Yes | Full access to all features and settings |
+| `faculty` | No | Present in the database enum but not referenced anywhere in the code; the code uses `instructor` for this role |
+| `college_org` | No | Account rows and the `college_organizations` table can exist, but this build has no organization dashboard, permission set or announcement targeting |
+
+Current limitations:
+
+- Recognized roles are defined in `config/app.php` (`ROLES`) and `includes/rbac.php`; a role missing
+  from those maps has no permissions.
+- Because role checks compare against `instructor`, a user stored with the `faculty` role is not
+  recognized: no permissions are granted and login routing falls back to the student dashboard
+  (`api/auth/login.php`, `pages/login.php`).
+- College organization accounts are routed to the student dashboard (no `college_org` case in the
+  login switch) and the `college_organizations` table is not used by this build.
+- Email notifications are role-agnostic: any targeted user who is `active`, not archived, has an
+  email address and has not disabled email notifications receives them.
 
 ## Requirements
 
